@@ -74,7 +74,12 @@ public sealed class ClockBrowserFixture : IAsyncLifetime
             var clockScript = $$"""
                 (() => {
                     const NativeDate = Date;
-                    let currentTime = {{initialTimestamp}};
+                    const testClockStorageKey = "skilltest.tests.clockTime";
+                    const savedTestClockTime = sessionStorage.getItem(testClockStorageKey);
+                    let currentTime = savedTestClockTime === null ? NaN : Number(savedTestClockTime);
+                    if (!Number.isFinite(currentTime)) {
+                        currentTime = {{initialTimestamp}};
+                    }
 
                     class ControlledDate extends NativeDate {
                         constructor(...args) {
@@ -92,6 +97,7 @@ public sealed class ClockBrowserFixture : IAsyncLifetime
 
                     globalThis.setClockTime = (milliseconds) => {
                         currentTime = milliseconds;
+                        sessionStorage.setItem(testClockStorageKey, String(milliseconds));
                     };
                     globalThis.Date = ControlledDate;
                 })();

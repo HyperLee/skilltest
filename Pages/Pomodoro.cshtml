@@ -1,0 +1,70 @@
+@page
+@{
+    ViewData["Title"] = "番茄鐘";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pomodoro.css" asp-append-version="true" />
+}
+
+<section class="pomodoro-page" data-pomodoro aria-labelledby="pomodoro-title">
+    <div class="pomodoro-page__toolbar">
+        <a class="pomodoro-page__home" asp-page="/Index">← 回首頁</a>
+        <p class="pomodoro-page__eyebrow">專注工作，適時休息</p>
+    </div>
+    <header class="pomodoro-page__header">
+        <h1 id="pomodoro-title">番茄鐘</h1>
+        <p>安排專注時間與休息，逐步完成每個番茄循環。</p>
+    </header>
+
+    <div class="pomodoro-settings" role="group" aria-label="番茄鐘設定">
+        <div class="pomodoro-settings__task">
+            <label class="form-label" for="focus-item">專注事項</label>
+            <input class="form-control" id="focus-item" name="focusItem" type="text" autocomplete="off" placeholder="輸入本次想完成的工作" />
+        </div>
+        <div class="pomodoro-settings__duration">
+            <label class="form-label" for="focus-duration">專注時間（分鐘）</label>
+            <input class="form-control" id="focus-duration" name="focusDuration" type="number" min="1" step="1" value="25" />
+        </div>
+        <div class="pomodoro-settings__duration">
+            <label class="form-label" for="short-break-duration">短休息時間（分鐘）</label>
+            <input class="form-control" id="short-break-duration" name="shortBreakDuration" type="number" min="1" step="1" value="5" />
+        </div>
+        <div class="pomodoro-settings__duration">
+            <label class="form-label" for="long-break-duration">長休息時間（分鐘）</label>
+            <input class="form-control" id="long-break-duration" name="longBreakDuration" type="number" min="1" step="1" value="20" />
+        </div>
+    </div>
+
+    <fieldset class="pomodoro-preferences">
+        <legend class="fs-6 fw-semibold">提示設定</legend>
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" id="mute-sound" type="checkbox" />
+            <label class="form-check-label" for="mute-sound">靜音</label>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input" id="desktop-notifications" type="checkbox" />
+            <label class="form-check-label" for="desktop-notifications">啟用桌面通知</label>
+        </div>
+        <p id="notification-status" class="small text-secondary mt-2" role="status" aria-live="polite"></p>
+    </fieldset>
+
+    <div class="pomodoro-timer" aria-live="polite">
+        <p id="pomodoro-phase" class="pomodoro-timer__phase">準備開始專注</p>
+        <time id="pomodoro-remaining" class="pomodoro-timer__digits" aria-label="剩餘時間">25:00</time>
+        <p class="pomodoro-timer__progress">本次循環：<span id="pomodoro-completed">0</span> / 4 個番茄</p>
+        <p id="timer-message" class="pomodoro-timer__message" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="pomodoro-controls">
+        <button id="focus-start" class="btn btn-primary btn-lg" type="button">開始專注</button>
+        <button id="focus-pause" class="btn btn-outline-primary btn-lg" type="button" hidden>暫停</button>
+        <button id="focus-resume" class="btn btn-primary btn-lg" type="button" hidden>繼續</button>
+        <button id="focus-reset" class="btn btn-outline-secondary btn-lg" type="button" hidden>重設此段</button>
+        <button id="cycle-reset" class="btn btn-outline-danger btn-lg" type="button" hidden>重設循環</button>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/pomodoro.js" asp-append-version="true"></script>
+}
