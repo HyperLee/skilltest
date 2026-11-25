@@ -92,9 +92,9 @@
   let audioContext = null;
   focusItem.value = state.focusItem;
 
-  function getRemainingMs() {
+  function getRemainingMs(now = Date.now()) {
     if (state.status === "running" && state.deadlineMs !== null) {
-      return Math.max(0, state.deadlineMs - Date.now());
+      return Math.max(0, state.deadlineMs - now);
     }
 
     return state.remainingMs;
@@ -222,14 +222,23 @@
     render();
   }
 
-  function completePhase() {
+  function prepareFocusPhase(message) {
+    state.phase = "focus";
+    state.phaseDurationMs = state.settings.focusMinutes * 60_000;
+    state.remainingMs = state.phaseDurationMs;
+    state.deadlineMs = null;
+    state.status = "idle";
+    state.message = message;
+  }
+
+  function completePhase(completedAt) {
     if (state.phase === "focus") {
       state.completedPomodoros = Math.min(4, state.completedPomodoros + 1);
       state.phase = state.completedPomodoros === 4 ? "longBreak" : "shortBreak";
       const durationKey = state.phase === "longBreak" ? "longBreakMinutes" : "shortBreakMinutes";
       state.phaseDurationMs = state.settings[durationKey] * 60_000;
       state.remainingMs = state.phaseDurationMs;
-      state.deadlineMs = Date.now() + state.remainingMs;
+      state.deadlineMs = completedAt + state.remainingMs;
       state.status = "running";
       state.message = state.phase === "longBreak"
         ? "專注時間結束，開始長休息"
@@ -239,14 +248,9 @@
       if (completedPhase === "longBreak") {
         state.completedPomodoros = 0;
       }
-      state.phase = "focus";
-      state.phaseDurationMs = state.settings.focusMinutes * 60_000;
-      state.remainingMs = state.phaseDurationMs;
-      state.deadlineMs = null;
-      state.status = "idle";
-      state.message = completedPhase === "longBreak"
+      prepareFocusPhase(completedPhase === "longBreak"
         ? "長休息結束，新循環已開始"
-        : "短休息結束，準備開始下一段專注";
+        : "短休息結束，準備開始下一段專注");
     }
 
     playSound();
@@ -256,9 +260,9 @@
   }
 
   function updateTimer() {
-    if (state.status === "running" && getRemainingMs() <= 0) {
-      completePhase();
-      return;
+    const now = Date.now();
+    while (state.status === "running" && state.deadlineMs !== null && state.deadlineMs <= now) {
+      completePhase(state.deadlineMs);
     }
     render();
   }
@@ -348,11 +352,7 @@
     }
 
     state.completedPomodoros = 0;
-    state.status = "idle";
-    state.phaseDurationMs = state.settings.focusMinutes * 60_000;
-    state.remainingMs = state.phaseDurationMs;
-    state.deadlineMs = null;
-    state.message = "";
+    prepareFocusPhase("");
     saveState();
     render();
   });
@@ -368,6 +368,7 @@
     saveState();
   });
 
+  document.addEventListener("visibilitychange", updateTimer);
   state.message = typeof storedState.message === "string" ? storedState.message : "";
   window.setInterval(updateTimer, 250);
   render();

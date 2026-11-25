@@ -180,14 +180,13 @@ public sealed class PomodoroPageTests(ClockBrowserFixture fixture) : IClassFixtu
         await using var context = await fixture.CreateContextAsync();
         await context.AddInitScriptAsync("""
             const permissionKey = "skilltest.tests.notificationPermission";
-            const requestKey = "skilltest.tests.notificationRequests";
+            window.notificationRequestAttempted = false;
             class TestNotification {
                 static get permission() {
                     return sessionStorage.getItem(permissionKey) ?? "default";
                 }
                 static async requestPermission() {
-                    const count = Number(sessionStorage.getItem(requestKey) ?? "0");
-                    sessionStorage.setItem(requestKey, String(count + 1));
+                    window.notificationRequestAttempted = true;
                     sessionStorage.setItem(permissionKey, "granted");
                     return "granted";
                 }
@@ -198,16 +197,16 @@ public sealed class PomodoroPageTests(ClockBrowserFixture fixture) : IClassFixtu
         var page = await context.NewPageAsync();
 
         await page.GotoAsync($"{fixture.BaseUrl}/Pomodoro");
-        Assert.Equal("0", await page.EvaluateAsync<string>("() => sessionStorage.getItem('skilltest.tests.notificationRequests') ?? '0'"));
+        Assert.False(await page.EvaluateAsync<bool>("() => window.notificationRequestAttempted"));
         await page.GetByLabel("靜音").CheckAsync();
         await page.GetByLabel("啟用桌面通知").CheckAsync();
 
-        Assert.Equal("1", await page.EvaluateAsync<string>("() => sessionStorage.getItem('skilltest.tests.notificationRequests')"));
+        Assert.True(await page.EvaluateAsync<bool>("() => window.notificationRequestAttempted"));
         await page.ReloadAsync();
 
         Assert.True(await page.GetByLabel("靜音").IsCheckedAsync());
         Assert.True(await page.GetByLabel("啟用桌面通知").IsCheckedAsync());
-        Assert.Equal("1", await page.EvaluateAsync<string>("() => sessionStorage.getItem('skilltest.tests.notificationRequests')"));
+        Assert.False(await page.EvaluateAsync<bool>("() => window.notificationRequestAttempted"));
     }
 
     [Fact]
@@ -216,11 +215,11 @@ public sealed class PomodoroPageTests(ClockBrowserFixture fixture) : IClassFixtu
         var initialTime = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
         await using var context = await fixture.CreateContextAsync("UTC", initialTime);
         await context.AddInitScriptAsync("""
-            window.audioContextCount = 0;
-            window.audioStartCount = 0;
+            window.audioContextReady = false;
+            window.audioAlertPlayed = false;
             class TestAudioContext {
                 constructor() {
-                    window.audioContextCount += 1;
+                    window.audioContextReady = true;
                     this.currentTime = 0;
                     this.state = "running";
                     this.destination = {};
@@ -229,7 +228,7 @@ public sealed class PomodoroPageTests(ClockBrowserFixture fixture) : IClassFixtu
                     return {
                         frequency: { setValueAtTime() {} },
                         connect() {},
-                        start() { window.audioStartCount += 1; },
+                        start() { window.audioAlertPlayed = true; },
                         stop() {}
                     };
                 }
@@ -248,14 +247,14 @@ public sealed class PomodoroPageTests(ClockBrowserFixture fixture) : IClassFixtu
         await page.GetByLabel("靜音").CheckAsync();
         await page.GetByLabel("專注時間（分鐘）").FillAsync("1");
         await page.GetByRole(AriaRole.Button, new() { Name = "開始專注" }).ClickAsync();
-        Assert.Equal(0, await page.EvaluateAsync<int>("() => window.audioContextCount"));
+        Assert.False(await page.EvaluateAsync<bool>("() => window.audioContextReady"));
 
         await page.GetByLabel("靜音").UncheckAsync();
-        Assert.Equal(1, await page.EvaluateAsync<int>("() => window.audioContextCount"));
+        Assert.True(await page.EvaluateAsync<bool>("() => window.audioContextReady"));
         await page.EvaluateAsync("() => window.setClockTime(Date.now() + 60000)");
         await page.WaitForFunctionAsync("() => document.querySelector('#pomodoro-phase')?.textContent === '短休息中'");
 
-        Assert.Equal(1, await page.EvaluateAsync<int>("() => window.audioStartCount"));
+        Assert.True(await page.EvaluateAsync<bool>("() => window.audioAlertPlayed"));
     }
 
     [Fact]
@@ -330,6 +329,33 @@ public sealed class PomodoroPageTests(ClockBrowserFixture fixture) : IClassFixtu
             "() => document.querySelector('#pomodoro-phase')?.textContent === '長休息結束，新循環已開始'");
 
         Assert.Equal("0", await page.Locator("#pomodoro-completed").InnerTextAsync());
+        Assert.Equal("01:00", await page.GetByLabel("剩餘時間").InnerTextAsync());
+    }
+
+    [Fact]
+    public async Task BackgroundTimeAdvancesThroughElapsedFocusAndRestBeforeTheNextFocus()
+    {
+        var initialTime = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        await using var context = await fixture.CreateContextAsync("UTC", initialTime);
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync($"{fixture.BaseUrl}/Pomodoro");
+        await page.GetByLabel("專注時間（分鐘）").FillAsync("1");
+        await page.GetByLabel("短休息時間（分鐘）").FillAsync("1");
+        await page.GetByRole(AriaRole.Button, new() { Name = "開始專注" }).ClickAsync();
+        await page.EvaluateAsync("""
+            () => {
+                Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+                document.dispatchEvent(new Event("visibilitychange"));
+                window.setClockTime(Date.now() + 180000);
+                Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+                document.dispatchEvent(new Event("visibilitychange"));
+            }
+            """);
+        await page.WaitForTimeoutAsync(350);
+
+        Assert.Equal("短休息結束，準備開始下一段專注", await page.Locator("#pomodoro-phase").InnerTextAsync());
+        Assert.Equal("1", await page.Locator("#pomodoro-completed").InnerTextAsync());
         Assert.Equal("01:00", await page.GetByLabel("剩餘時間").InnerTextAsync());
     }
 }
