@@ -158,30 +158,6 @@
   display: none !important;
 }
 
-@media (max-width: 767.98px) {
-  .pomodoro-page {
-    padding: 1.25rem;
-  }
-
-  .pomodoro-page__eyebrow {
-    text-align: right;
-  }
-
-  .pomodoro-settings {
-    grid-template-columns: 1fr;
-  }
-
-  .pomodoro-preferences {
-    flex-wrap: wrap;
-    gap: .8rem 1.25rem;
-  }
-
-  #notification-status {
-    flex-basis: 100%;
-    margin-left: 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
