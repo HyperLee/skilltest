@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug skilltest (開啟瀏覽器)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build skilltest",
+      "program": "${workspaceFolder}/bin/Debug/net11.0/skilltest.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "launchSettingsProfile": "https",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
+    }
+  ]
+}

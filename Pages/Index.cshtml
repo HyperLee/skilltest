@@ -1,10 +1,12 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "首頁";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="text-center py-5 my-4" aria-labelledby="home-title">
+    <p class="text-primary fw-semibold text-uppercase mb-2">世界時間</p>
+    <h1 id="home-title" class="display-4 fw-bold">現在時間，一眼掌握</h1>
+    <p class="lead text-secondary mt-3 mb-4">查看此刻時間，並切換至常用時區。</p>
+    <a class="btn btn-primary btn-lg px-4" asp-page="/Clock">現在時間</a>
+</section>

@@ -1,0 +1,56 @@
+@page
+@{
+    ViewData["Title"] = "現在時間";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/clock.css" asp-append-version="true" />
+}
+
+<section class="clock-page" data-clock-page aria-labelledby="clock-heading">
+    <div class="clock-page__toolbar">
+        <a class="clock-page__home" asp-page="/Index">
+            <span aria-hidden="true">←</span>
+            回首頁
+        </a>
+
+        <div class="clock-page__controls">
+            <time id="clock-date" class="clock-page__date" aria-label="目前日期">----</time>
+
+            <div class="timezone-picker" data-timezone-picker>
+                <button id="timezone-button"
+                        class="clock-timezone-button"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="timezone-menu">
+                    切換時區
+                    <span aria-hidden="true">⌄</span>
+                </button>
+
+                <div id="timezone-menu" class="timezone-menu" hidden>
+                    <label class="timezone-menu__label" for="timezone-search">搜尋時區</label>
+                    <input id="timezone-search"
+                           class="timezone-menu__search"
+                           type="search"
+                           autocomplete="off"
+                           placeholder="輸入城市或時區名稱" />
+                    <p class="timezone-menu__hint">可搜尋城市、地區或 IANA 時區名稱</p>
+                    <div id="timezone-options" class="timezone-options"></div>
+                    <p id="timezone-empty" class="timezone-menu__empty" hidden>找不到符合的時區。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="clock-page__display">
+        <h1 id="clock-heading" class="visually-hidden">現在時間</h1>
+        <p class="clock-page__eyebrow" aria-hidden="true">現在時間</p>
+        <time id="clock-time" class="clock-page__digits" aria-label="目前時間">--:--:--</time>
+    </div>
+
+    <p id="clock-zone" class="clock-page__zone" aria-live="polite">正在載入時區…</p>
+</section>
+
+@section Scripts {
+    <script src="~/js/clock.js" asp-append-version="true"></script>
+}

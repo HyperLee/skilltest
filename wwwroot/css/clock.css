@@ -1,0 +1,232 @@
+.clock-page {
+  position: relative;
+  min-height: clamp(34rem, calc(100vh - 15rem), 70rem);
+  overflow: visible;
+  padding: 2rem 2.5rem;
+  border: 1px solid #dce6f1;
+  border-radius: 1.5rem;
+  background: radial-gradient(circle at 50% 44%, #fff 0, #f7faff 55%, #eff5fb 100%);
+  box-shadow: 0 1rem 3rem rgba(27, 61, 96, .08);
+}
+
+.clock-page__toolbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.clock-page__home {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  color: #315a83;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.clock-page__home:hover {
+  color: #1b6ec2;
+  text-decoration: underline;
+}
+
+.clock-page__home:focus-visible,
+.clock-timezone-button:focus-visible,
+.timezone-menu__search:focus-visible,
+.timezone-option:focus-visible {
+  outline: 3px solid rgba(37, 140, 251, .45);
+  outline-offset: 3px;
+}
+
+.clock-page__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .65rem;
+}
+
+.clock-page__date {
+  color: #53677f;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+}
+
+.timezone-picker {
+  position: relative;
+}
+
+.clock-timezone-button {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .6rem .95rem;
+  border: 1px solid #c9d8e9;
+  border-radius: .7rem;
+  background: #fff;
+  color: #244f7a;
+  font-weight: 600;
+  box-shadow: 0 .25rem .75rem rgba(29, 64, 99, .07);
+  cursor: pointer;
+}
+
+.clock-timezone-button:hover,
+.clock-timezone-button[aria-expanded="true"] {
+  border-color: #83abd4;
+  background: #f8fbff;
+}
+
+.clock-timezone-button span {
+  color: #53799e;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.timezone-menu {
+  position: absolute;
+  top: calc(100% + .65rem);
+  right: 0;
+  z-index: 5;
+  width: 25rem;
+  max-width: calc(100vw - 3rem);
+  padding: 1rem;
+  border: 1px solid #d8e3ef;
+  border-radius: .9rem;
+  background: #fff;
+  box-shadow: 0 1rem 2.5rem rgba(27, 61, 96, .18);
+}
+
+.timezone-menu[hidden],
+.timezone-menu__empty[hidden] {
+  display: none !important;
+}
+
+.timezone-menu__label {
+  display: block;
+  margin-bottom: .45rem;
+  color: #243d57;
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.timezone-menu__search {
+  width: 100%;
+  padding: .65rem .75rem;
+  border: 1px solid #bdcddd;
+  border-radius: .55rem;
+  color: #20364d;
+}
+
+.timezone-menu__hint {
+  margin: .45rem 0 .8rem;
+  color: #6a7d91;
+  font-size: .78rem;
+}
+
+.timezone-options {
+  max-height: 22rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.timezone-option-group + .timezone-option-group {
+  margin-top: .75rem;
+}
+
+.timezone-option-group__title {
+  margin: 0;
+  padding: .45rem .5rem .35rem;
+  color: #6a7d91;
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.timezone-option {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .16rem;
+  padding: .58rem .6rem;
+  border: 0;
+  border-radius: .55rem;
+  background: transparent;
+  color: #243d57;
+  text-align: left;
+  cursor: pointer;
+}
+
+.timezone-option:hover,
+.timezone-option[aria-pressed="true"] {
+  background: #edf5fd;
+}
+
+.timezone-option__name {
+  font-weight: 650;
+}
+
+.timezone-option__details {
+  color: #6a7d91;
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.timezone-menu__empty {
+  margin: .9rem .25rem .25rem;
+  color: #6a7d91;
+  font-size: .9rem;
+}
+
+.clock-page__display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 5rem);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.clock-page__eyebrow {
+  margin: 0 0 .75rem;
+  color: #6a7d91;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+}
+
+.clock-page__digits {
+  display: block;
+  color: #173a5e;
+  font-size: clamp(4rem, 9vw, 8rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: .015em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.clock-page__zone {
+  position: absolute;
+  right: 2.5rem;
+  bottom: 2rem;
+  max-width: calc(100% - 5rem);
+  margin: 0;
+  color: #405a75;
+  font-size: .95rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
